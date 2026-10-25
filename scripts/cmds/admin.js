@@ -1,15 +1,21 @@
+const fs = require('fs-extra');
+const path = require('path');
+const axios = require('axios');
+
 module.exports = {
   config: {
     name: "admin",
-    aliases: ["owner", "botadmin"],
-    version: "1.0.0",
-    credits: "YourName",
-    description: "Shows bot and owner information",
+    version: "1.2.0",
+    author: "Villain Biplob",
+    countDown: 5,
+    role: 0,
+    description: "Shows bot and owner information with custom image banner",
+    category: "info",
     usages: "admin",
     cooldown: 5
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, messageID } = event;
 
     // আপনার দেওয়া ডিজাইন ও তথ্য
@@ -23,7 +29,26 @@ module.exports = {
       `📝 𝗕𝗶𝗼 : "Love is Name Sex Is game!💋💥"\n\n` +
       `✨ Contact the owner for any bot-related issues or inquiries!`;
 
-    // মেসেজ পাঠানো
-    return api.sendMessage(adminInfoText, threadID, messageID);
+    const imagePath = path.join(__dirname, 'cache', 'admin_pic.jpg');
+    
+    try {
+      // এখানে আপনার ছবির ডিরেক্ট লিংক বসানো হয়েছে
+      const imageUrl = "https://i.imgur.com/6910_biplob_boss.jpg"; 
+      
+      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      await fs.ensureDir(path.join(__dirname, 'cache'));
+      await fs.writeFile(imagePath, response.data);
+
+      return api.sendMessage({
+        body: adminInfoText,
+        attachment: fs.createReadStream(imagePath)
+      }, threadID, () => {
+        if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+      }, messageID);
+
+    } catch (error) {
+      console.error("Error sending admin image:", error);
+      return api.sendMessage(adminInfoText, threadID, messageID);
+    }
   }
 };
