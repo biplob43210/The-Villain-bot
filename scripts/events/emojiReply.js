@@ -1,13 +1,16 @@
 module.exports = {
   config: {
     name: "emojiReply",
-    eventType: ["message"],
     version: "1.0.0",
-    credits: "Villain Biplob",
-    description: "Replies with matched text depending on the emoji sent by user"
+    author: "Villain Biplob",
+    countDown: 5,
+    role: 0,
+    description: "Replies with matched text depending on the emoji sent by user",
+    category: "events",
+    eventType: ["message"]
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, messageID, body } = event;
 
     if (!body) return;
