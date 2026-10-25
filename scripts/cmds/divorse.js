@@ -4,14 +4,17 @@ module.exports = {
   config: {
     name: "divorce",
     aliases: ["talak", "breakup"],
-    version: "1.0.0",
-    credits: "Villain Biplob",
-    description: "Fun sad divorce script with video attached",
+    version: "1.1.0",
+    author: "Villain Biplob",
+    countDown: 5,
+    role: 0,
+    description: "Fun sad divorce script with video attached and boss custom message",
+    category: "fun",
     usages: "divorce @mention",
     cooldown: 5
   },
 
-  run: async function({ api, event, args }) {
+  onStart: async function({ api, event, args }) {
     const { threadID, messageID, mentions } = event;
     const mentionedIDs = Object.keys(mentions);
 
@@ -23,13 +26,14 @@ module.exports = {
     const partnerID = mentionedIDs[0];
     const partnerName = mentions[partnerID].replace("@", "");
 
-    // ২. স্যাড ডিভোর্স টেক্সট
+    // ২. স্যাড ডিভোর্স টেক্সট ও আপনার বস সম্পর্কিত নতুন লাইন যুক্ত করা
     const divorceText = 
       `💔 ─── [ অফিশিয়াল তালাকনামা ] ─── ⚖️\n\n` +
       `ব্রেকিং নিউজ! দাম্পত্য কলহের জেরে @${partnerName} এর সাথে আপনার বিচ্ছেদ ঘটেছে!\n\n` +
       `🤵‍♂️ ঘটক : 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯\n` +
       `🤝 সাক্ষী : 𝗬𝘂𝘁𝗮\n\n` +
-      `আজ থেকে আপনারা সম্পূর্ণ আলাদা! মন খারাপ করবেন না, জীবন তো একটাই... 🥺🥀`;
+      `ডিবোর্সি ভাবিদের কষ্ট দেখে 🦋⃟✮⃝𝐕𝐢𝗹𝗹𝗮𝗶𝗻 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝ বসের মন খারাপ তাই সে ডিভোর্সি ভাবিদের পাশে দাঁড়াতে চায়! 😼🔥\n\n` +
+      `আজ থেকে আপনারা সবাই 🦋⃟✮⃝𝐕𝐢𝐥𝐥𝐚𝐢𝐧 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝ বসের মনের মানুষ! মন খারাপ করবেন না, জীবন তো একটাই... 🥺🥀`;
 
     const mentionData = [{
       tag: `@${partnerName}`,
@@ -37,7 +41,7 @@ module.exports = {
     }];
 
     try {
-      // ৩. স্যাড ডিভোর্স ভিডিওর ডিরেক্ট লিংক (এখানে আপনার পছন্দের স্যাড ভিডিও লিংক বসাতে পারেন)
+      // ৩. স্যাড ডিভোর্স ভিডিওর ডিরেক্ট লিংক
       const videoUrl = "https://i.imgur.com/3Z3Q83a.mp4"; // স্যাম্পল স্যাড ভিডিও লিংক
       const videoStream = (await axios.get(videoUrl, { responseType: "stream" })).data;
 
