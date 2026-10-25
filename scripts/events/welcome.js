@@ -5,14 +5,17 @@ const axios = require('axios');
 
 module.exports = {
   config: {
-    name: "welcomeBanner",
-    eventType: ["log:subscribe"],
+    name: "welcome",
     version: "2.0.0",
-    credits: "Yuta/biplob",
-    description: "Sends a welcome text and a custom canvas banner including profile picture and member count."
+    author: "Yuta/biplob",
+    countDown: 5,
+    role: 0,
+    description: "Sends a welcome text and a custom canvas banner including profile picture and member count.",
+    category: "events",
+    eventType: ["log:subscribe"]
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, logMessageData } = event;
     const addedParticipants = logMessageData.addedParticipants;
 
