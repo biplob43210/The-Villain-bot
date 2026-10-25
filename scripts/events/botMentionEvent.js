@@ -1,13 +1,16 @@
 module.exports = {
   config: {
     name: "botMentionEvent",
-    eventType: ["message"],
     version: "2.0.0",
-    credits: "Villain Biplob",
-    description: "Replies with pure romantic captions when someone mentions the bot or uses keywords"
+    author: "Villain Biplob",
+    countDown: 5,
+    role: 0,
+    description: "Replies with pure romantic captions when someone mentions the bot or uses keywords",
+    category: "events",
+    eventType: ["message"]
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, messageID, body, mentions } = event;
 
     if (!body) return;
@@ -25,9 +28,9 @@ module.exports = {
       `𝐇𝐞𝐚 𝐉𝐚𝐧 𝐁𝐨𝐥𝐨 💋🖤\nআপনারে কিভাবে সাহায্য করতে পারি?`,
       `ডাকলে আমায় এত মিষ্টি করে? আপনার একটা ডাকেই তো আমার পুরো মনটা ভালো হয়ে যায়! 🥰🌹`,
       `হাজার মানুষের ভিড়েও যেন শুধু আপনার গলার সুরটাই আমার কানে বাজে... বলুন জান, কি বলতে চান? 💖✨`,
-      `ভালোবাসার রঙিন অনুভূতির মতো আপনার এই মেসেজটা আমার মন ছুঁয়ে গেল! বলুন কিভাবে আপনার মুখে হাসি ফোটাতে পারি? 🌸💍`,
+      `ভালোবাসার রঙিন অনুভূতির মতো আপনার এই মেসেজটা মন ছুঁয়ে গেল! বলুন কিভাবে আপনার মুখে হাসি ফোটাতে পারি? 🌸💍`,
       `আমাদের বস Villain Biplob আর সাক্ষী Yuta এর তরফ থেকে আপনার জন্য রইলো একরাশ লাল গোলাপের ভালোবাসা! 🌹🖤`,
-      `একটুখানি মিষ্টি কথা আর ভালোবাসায় ভরিয়ে দিতে Yuta 6T9 সবসময় আপনার পাশে আছে! 🥰💌`,
+      `একটুখানি মিষ্টি কথা আর ভালোবাসায় ভরিয়ে দিতে Yuta সবসময় আপনার পাশে আছে! 🥰💌`,
       `আপনার একটা মেসেজের অপেক্ষায় যেন চোখ দুটো আটকে থাকে... মন খুলে বলুন কি শুনতে চান আজ? ✨💖`
     ];
 
