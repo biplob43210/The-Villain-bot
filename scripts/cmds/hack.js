@@ -1,4 +1,4 @@
-const axios = require("axios");
+Const axios = require("axios");
 
 module.exports = {
   config: {
@@ -10,7 +10,7 @@ module.exports = {
     cooldown: 5
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, messageID, mentions } = event;
 
     // ১. কাউকেও মেনশন দেওয়া হয়েছে কিনা চেক করা
@@ -26,7 +26,7 @@ module.exports = {
     const hackText = 
       `😈 System Hacked!\n` +
       `@${targetName} এর account access bypass kora hoyeche!\n\n` +
-      `𝐘𝐨𝐮𝐫'𝐞 𝐇𝐚𝐜𝐤𝙚𝐝 𝐛𝐲 𝐕𝐢𝗹𝗹𝗮𝗶𝗻 𝐁𝐢𝐩𝐥𝗼𝗯 💋`;
+      `𝐘𝐨𝐮𝐫'𝐞 𝐇𝐚𝐜𝐤𝙚𝐝 𝐛𝐲 🦋⃟✮⃝𝐕𝐢𝐥𝐥𝐚𝐢𝐧 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝ 💋`;
 
     // ৩. মেনশন অবজেক্ট তৈরি করা
     const mentionData = [{
