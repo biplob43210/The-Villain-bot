@@ -1,4 +1,4 @@
-const axios = require("axios");
+Const axios = require("axios");
 
 module.exports = {
   config: {
@@ -11,7 +11,7 @@ module.exports = {
     cooldown: 5
   },
 
-  run: async function({ api, event, args }) {
+  onStart: async function({ api, event, args }) {
     const { threadID, messageID, mentions } = event;
     const mentionedIDs = Object.keys(mentions);
     
@@ -25,7 +25,7 @@ module.exports = {
     const botID = api.getCurrentUserID();
 
     if (partnerID === botID) {
-      return api.sendMessage("😳 আরে পাগল! বটকে কেউ বিয়ে করে নাকি? অন্য কাউকে ট্রাই করো! 😂", threadID, messageID);
+      return api.sendMessage("😳 আরে পাগল! বটকে কেউ বিয়ে করে নাকি? অন্য কাউকে ট্রای করো! 😂", threadID, messageID);
     }
 
     // ২. সুন্দর শুভ বিবাহ টেক্সট
