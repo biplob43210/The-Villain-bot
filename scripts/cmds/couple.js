@@ -8,13 +8,16 @@ module.exports = {
     name: "couple",
     aliases: ["match", "juti", "lovematch"],
     version: "3.0.0",
-    credits: "Villain Biplob",
+    author: "Villain Biplob",
+    countDown: 5,
+    role: 0,
     description: "Generates a dynamic couple banner with profile pics and pure romantic captions",
+    category: "fun",
     usages: "couple",
     cooldown: 5
   },
 
-  run: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     const { threadID, messageID } = event;
 
     try {
