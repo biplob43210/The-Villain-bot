@@ -1,5 +1,4 @@
 const axios = require("axios");
-const fs = "fs"; // অথবা require("fs")
 const fsModule = require("fs");
 const path = require("path");
 
@@ -54,8 +53,8 @@ module.exports = {
     const videoPath = path.join(cacheDir, `marriage_${Date.now()}.mp4`);
 
     try {
-      // ৩. ১০০% ওয়ার্কিং ডিরেক্ট ভিডিও লিংক
-      const videoUrl = "https://media.geeksforgeeks.org/wp-content/uploads/20210318193532/animation_500-4.mp4"; 
+      // ৩. আপনার দেওয়া Catbox ভিডিওর ডিরেক্ট লিংক
+      const videoUrl = "https://files.catbox.moe/1671jv.mp4"; 
       
       const response = await axios({
         method: 'GET',
