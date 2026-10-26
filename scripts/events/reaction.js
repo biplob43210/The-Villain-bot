@@ -1,7 +1,7 @@
 module.exports = {
   config: {
     name: "reactionReply",
-    version: "1.1.2",
+    version: "1.1.3",
     author: "Yuta biplob",
     countDown: 5,
     role: 0,
@@ -11,11 +11,11 @@ module.exports = {
   },
 
   onStart: async function({ api, event }) {
-    const { threadID, userID, reaction, messageID, authorID } = event;
+    const { threadID, userID, reaction, messageID } = event;
     const botID = api.getCurrentUserID();
 
-    // ১. রিঅ্যাক্টটি কি বটের নিজের মেসেজে দেওয়া হয়েছে?
-    if (authorID !== botID) return;
+    // ১. বট যদি নিজে নিজের মেসেজে রিঅ্যাক্ট করে, তবে ইগনোর করবে
+    if (userID === botID) return;
 
     // ২. ইউজারের নাম ফেচ করা (সেফটি সহ)
     let name = "বন্ধু";
@@ -57,9 +57,12 @@ module.exports = {
             replyMessage = `অবাক হয়ে গেলেন নাকি @${name}? চোখ কপালে ওঠার মতো কী দেখলেন? 😲`;
             break;
         default:
-            replyMessage = `আপনার '${reaction}' রিঅ্যাক্টটি পেয়ে গেলাম, @${name}! 👍`;
-            break;
+            // যদি আনত ইমোজি হয়, তাহলে নিচের কোডটি রিমুভ করতে চাইলে কমেন্ট আউট করে দিতে পারেন
+            return; // শুধু নির্দিষ্ট ইমোজিগুলোতে কাজ করাতে চাইলে এটি রাখতে পারেন
     }
+
+    // যদি কোনো রেসপন্স মেসেজ না থাকে তবে থামিয়ে দিবে
+    if (!replyMessage) return;
 
     // ৪. মেনশন সেট করা
     let mentions = [{
