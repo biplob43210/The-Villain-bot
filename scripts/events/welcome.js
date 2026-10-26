@@ -1,4 +1,4 @@
-const { createCanvas, loadImage } = require('canvas');
+const Jimp = require('jimp');
 const fs = require('fs-extra');
 const path = require('path');
 const axios = require('axios');
@@ -6,11 +6,11 @@ const axios = require('axios');
 module.exports = {
   config: {
     name: "welcome",
-    version: "2.0.0",
-    author: "Yuta/biplob",
+    version: "2.1.0",
+    author: "Yuta/biplob (Modified for Jimp)",
     countDown: 5,
     role: 0,
-    description: "Sends a welcome text and a custom canvas banner including profile picture and member count.",
+    description: "Sends a welcome text and a custom banner using Jimp (Termux friendly).",
     category: "events",
     eventType: ["log:subscribe"]
   },
@@ -19,7 +19,6 @@ module.exports = {
     const { threadID, logMessageData } = event;
     const addedParticipants = logMessageData.addedParticipants;
 
-    // গ্রুপ বা থ্রেডের তথ্য নিয়ে আসা (মোট মেম্বার সংখ্যা বের করার জন্য)
     let threadInfo = await api.getThreadInfo(threadID);
     const groupName = threadInfo.threadName || "our group";
     const totalMembers = threadInfo.participantIDs.length;
@@ -28,11 +27,9 @@ module.exports = {
       const userID = member.userFbId;
       const userName = member.fullName;
 
-      // বট নিজে অ্যাড হলে ওয়েলকাম দেওয়ার দরকার নেই
       if (userID === api.getCurrentUserID()) continue;
 
       try {
-        // ১. প্রথমে টেক্সট মেসেজ পাঠানো (কততম মেম্বার তা সহ)
         const msgText = `Hello @${userName}, welcome to our ${groupName}! 🎉\nYou are our ${totalMembers}th member!`;
         
         await api.sendMessage({
@@ -43,81 +40,54 @@ module.exports = {
           }]
         }, threadID);
 
-        // ২. কাস্টম ব্যানার তৈরি করা (Canvas)
-        const canvas = createCanvas(1200, 630);
-        const ctx = canvas.getContext('2d');
+        // Jimp দিয়ে ব্যানার তৈরি (টার্মুক ফ্রেন্ডলি)
+        let width = 1200;
+        let height = 630;
+        let baseImage = new Jimp(width, height, '#1a1a2e');
 
-        // ব্যাকগ্রাউন্ড গ্রেডিয়েন্ট
-        const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
-        gradient.addColorStop(0, '#0f0c29');
-        gradient.addColorStop(0.5, '#302b63');
-        gradient.addColorStop(1, '#24243e');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 1200, 630);
-
-        // বর্ডার ডিজাইন
-        ctx.strokeStyle = '#f39c12';
-        ctx.lineWidth = 12;
-        ctx.strokeRect(25, 25, 1150, 580);
-
-        // ইউজারের প্রোফাইল পিকচার (DP) ফেচ করা
+        // প্রোফাইল পিকচার ফেচ করা এবং সার্কেল করে বসানো
         let avatarUrl = `https://graph.facebook.com/${userID}/picture?height=500&width=500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
         try {
-          const response = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
-          const avatar = await loadImage(response.data);
-
-          // গোল (Circular) প্রোফাইল পিকচার আঁকার জন্য ক্লিপিং
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(600, 200, 110, 0, Math.PI * 2, true);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(avatar, 490, 90, 220, 220);
-          ctx.restore();
-
-          // প্রোফাইল পিকচারের চারপাশে সোনালী বর্ডার
-          ctx.beginPath();
-          ctx.arc(600, 200, 110, 0, Math.PI * 2, true);
-          ctx.lineWidth = 8;
-          ctx.strokeStyle = '#f39c12';
-          ctx.stroke();
+          let response = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
+          let avatar = await Jimp.read(response.data);
+          avatar.resize(220, 220);
+          avatar.circle(); // গোল করার জন্য
+          
+          // ব্যাকগ্রাউন্ডের মাঝে প্রোফাইল পিকচার বসানো (X: 490, Y: 90)
+          baseImage.composite(avatar, 490, 90);
         } catch (e) {
-          console.error("Could not load profile picture:", e);
+          console.error("Could not load profile picture in Jimp:", e);
         }
 
-        // টেক্সট সেকশন
-        ctx.textAlign = 'center';
+        // ফন্ট লোড করা এবং টেক্সট যুক্ত করা
+        const fontLarge = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE);
+        const fontMedium = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
 
-        // ওয়েলকাম হেডিং
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 45px Arial';
-        ctx.fillText('WELCOME TO', 600, 370);
+        // টেক্সট প্রিন্ট করা (প্রয়োজনমতো কোঅর্ডিনেট সেট করা হয়েছে)
+        baseImage.print(fontMedium, 0, 360, {
+          text: "WELCOME TO",
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+        }, width);
 
-        // গ্রুপের নাম
-        ctx.fillStyle = '#f39c12';
-        ctx.font = 'bold 50px Arial';
-        ctx.fillText(groupName, 600, 440);
+        baseImage.print(fontLarge, 0, 420, {
+          text: groupName,
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+        }, width);
 
-        // ইউজারের নাম
-        ctx.fillStyle = '#00ffcc';
-        ctx.font = 'bold 40px Arial';
-        ctx.fillText(userName, 600, 510);
+        baseImage.print(fontMedium, 0, 500, {
+          text: `User: ${userName} | Member No: ${totalMembers}`,
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+        }, width);
 
-        // কততম মেম্বার (যেমন: 90th Member)
-        ctx.fillStyle = '#ff4757';
-        ctx.font = 'bold 35px Arial';
-        ctx.fillText(`✨ Member No: ${totalMembers} ✨`, 600, 570);
-
-        // ক্যাশ ফাইলে সেভ করা
+        // ফাইলে সেভ করা
         const pathSave = path.join(__dirname, `cache/welcome_${userID}.png`);
         await fs.ensureDir(path.join(__dirname, 'cache'));
-        const buffer = canvas.toBuffer('image/png');
-        await fs.writeFile(pathSave, buffer);
+        await baseImage.writeAsync(pathSave);
 
-        // ৩. ব্যানার ছবি পাঠানো
+        // ব্যানার ছবি পাঠানো
         await api.sendMessage({
           attachment: fs.createReadStream(pathSave)
-        }, threadID, () => fs.unlinkSync(pathSave)); // পাঠানোর পর ডিলিট হয়ে যাবে
+        }, threadID, () => fs.unlinkSync(pathSave));
 
       } catch (error) {
         console.error("Error in welcome event:", error);
