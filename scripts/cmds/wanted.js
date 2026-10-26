@@ -1,26 +1,16 @@
-const Canvas = require("canvas");
-const fs = require("fs");
-const path = require("path");
+const Jimp = require('jimp');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 
 // 🔑 Facebook App Token
 const FB_TOKEN = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
 
-/* -------- inline applyText (no utils) -------- */
-function applyText(canvas, text, maxWidth, startSize, font = "Times New Roman") {
-  const ctx = canvas.getContext("2d");
-  let fontSize = startSize;
-  do {
-    ctx.font = `${fontSize}px ${font}`;
-    fontSize--;
-  } while (ctx.measureText(text).width > maxWidth && fontSize > 10);
-  return ctx.font;
-}
-
 module.exports = {
   config: {
     name: "wanted",
-    version: "1.0",
-    author: "Arafat",
+    version: "2.0",
+    author: "Arafat (Modified for Jimp)",
     role: 0,
     category: "fun",
     guide: "{pn} @mention / reply"
@@ -34,53 +24,47 @@ module.exports = {
       // target user (mention > reply > self)
       const targetID = mention[0] || replyID || event.senderID;
 
-      // Random bounty (same logic)
+      // Random bounty
       const price = Math.floor(Math.random() * 188708) + 329889;
       const currency = "$";
+      const priceText = price.toLocaleString() + currency;
 
-      // Facebook Graph avatar
-      const avatarURL =
-        `https://graph.facebook.com/${targetID}/picture?width=720&height=720&access_token=${FB_TOKEN}`;
+      // Facebook Graph avatar URL
+      const avatarURL = `https://graph.facebook.com/${targetID}/picture?width=720&height=720&access_token=${FB_TOKEN}`;
 
-      // Canvas setup (same as class)
-      const canvas = Canvas.createCanvas(257, 383);
-      const ctx = canvas.getContext("2d");
+      // ব্যাকগ্রাউন্ড ওয়েন্টেড টেমপ্লেট ইমেজ লোড করা
+      const bgURL = "https://raw.githubusercontent.com/Arafat-Core/Arafat-Temp/refs/heads/main/wanted.png";
+      
+      let background = await Jimp.read(bgURL);
+      background.resize(257, 383); // নির্দিষ্ট সাইজ নিশ্চিত করা
 
-      // Load images
-      const avatar = await Canvas.loadImage(avatarURL);
-      const background = await Canvas.loadImage(
-        "https://raw.githubusercontent.com/Arafat-Core/Arafat-Temp/refs/heads/main/wanted.png"
-      );
+      // ইউজারের প্রোফাইল পিকচার ফেচ করা
+      try {
+        const response = await axios.get(avatarURL, { responseType: 'arraybuffer' });
+        let avatar = await Jimp.read(response.data);
+        avatar.resize(210, 210); // মূল কোডের সাইজ অনুযায়ী
 
-      // Draw avatar
-      ctx.drawImage(avatar, 25, 60, 210, 210);
+        // ব্যাকগ্রাউন্ডের ওপর প্রোফাইল পিকচার বসানো (X: 25, Y: 60)
+        background.composite(avatar, 25, 60);
+      } catch (e) {
+        console.error("Could not load avatar for wanted poster:", e);
+      }
 
-      // Draw wanted poster overlay
-      ctx.drawImage(background, 0, 0, 257, 383);
+      // টেক্সট বসানোর জন্য ফন্ট লোড করা
+      const font = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
 
-      // Text style (same behavior)
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#513d34";
-      ctx.font = applyText(
-        canvas,
-        price.toLocaleString() + currency,
-        80,
-        200,
-        "Times New Roman"
-      );
+      // প্রাইস বা অ্যামাউন্ট টেক্সট পোস্টারের নিচে প্রিন্ট করা
+      background.print(font, 0, 310, {
+        text: priceText,
+        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+      }, 257);
 
-      ctx.fillText(
-        price.toLocaleString() + currency,
-        128,
-        315
-      );
-
-      // Save
+      // ফাইলে সেভ করা
       const cacheDir = path.join(__dirname, "cache");
-      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
+      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
       const imgPath = path.join(cacheDir, `wanted_${targetID}.png`);
-      fs.writeFileSync(imgPath, canvas.toBuffer());
+      await background.writeAsync(imgPath);
 
       message.reply(
         {
