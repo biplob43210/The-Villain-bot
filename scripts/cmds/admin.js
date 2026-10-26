@@ -32,8 +32,8 @@ module.exports = {
     const imagePath = path.join(__dirname, 'cache', 'admin_pic.jpg');
     
     try {
-      // এখানে আপনার ছবির ডিরেক্ট লিংক বসানো হয়েছে
-      const imageUrl = "https://i.imgur.com/6910_biplob_boss.jpg"; 
+      // এখানে আপনার ছবির সঠিক ডিরেক্ট লিংক বসানো হয়েছে
+      const imageUrl = "https://i.imgur.com/gTfK2Qx.jpg"; 
       
       const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       await fs.ensureDir(path.join(__dirname, 'cache'));
