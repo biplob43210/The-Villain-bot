@@ -43,7 +43,7 @@ module.exports = {
     const randomLine = funLines[Math.floor(Math.random() * funLines.length)];
 
     return api.sendMessage({
-      body: `✨ [ APU SPECIAL ZONE ] ✨\n\n${randomLine}\n\n(বট বস: 🦋⃟✮⃝𝐕𝐢𝗹𝐥𝐚𝐢𝐧 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝)`,
+      body: `✨ [ APU SPECIAL ZONE ] ✨\n\n${randomLine}\n\n(বট বস: 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯 💋💥`,
       mentions: mentions.length > 0 ? [{ tag: `@${apuName}`, id: targetID }] : []
     }, threadID, messageID);
   }
