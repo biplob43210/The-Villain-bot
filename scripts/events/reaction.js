@@ -1,7 +1,7 @@
 module.exports = {
   config: {
     name: "reactionReply",
-    version: "1.1.0",
+    version: "1.1.2",
     author: "Yuta biplob",
     countDown: 5,
     role: 0,
@@ -14,19 +14,21 @@ module.exports = {
     const { threadID, userID, reaction, messageID, authorID } = event;
     const botID = api.getCurrentUserID();
 
-    // ১. রিঅ্যাক্টটি কি বটের নিজের মেসেজে দেওয়া হয়েছে? (যদি অন্য কারো মেসেজে হয়, তবে কাজ করবে না)
+    // ১. রিঅ্যাক্টটি কি বটের নিজের মেসেজে দেওয়া হয়েছে?
     if (authorID !== botID) return;
 
-    // ২. যে ইউজার রিঅ্যাক্ট দিয়েছে তার নাম ফেচ করা (মেনশন দেওয়ার জন্য)
-    let userInfo;
+    // ২. ইউজারের নাম ফেচ করা (সেফটি সহ)
+    let name = "বন্ধু";
     try {
-        userInfo = await api.getUserInfo(userID);
+        let userInfo = await api.getUserInfo(userID);
+        if (userInfo && userInfo[userID]) {
+            name = userInfo[userID].name || userInfo[userID].firstName || "বন্ধু";
+        }
     } catch (e) {
-        userInfo = {};
+        console.error("Error fetching user info:", e);
     }
-    let name = userInfo[userID]?.name || "বন্ধু";
 
-    // ৩. কোন ইমোজি দিয়ে রিঅ্যাক্ট করা হয়েছে তার ওপর ভিত্তি করে রেসপন্স তৈরি করা
+    // ৩. কোনো ইমোজিতে রিঅ্যাক্ট করা হয়েছে তার ওপর ভিত্তি করে রেসপন্স
     let replyMessage = "";
 
     switch (reaction) {
@@ -59,16 +61,20 @@ module.exports = {
             break;
     }
 
-    // ৪. মেনশন ট্যাগ সেট করা
+    // ৪. মেনশন সেট করা
     let mentions = [{
         tag: `@${name}`,
         id: userID
     }];
 
     // ৫. মেসেজ পাঠানো
-    api.sendMessage({
-        body: replyMessage,
-        mentions: mentions
-    }, threadID, messageID);
+    try {
+        await api.sendMessage({
+            body: replyMessage,
+            mentions: mentions
+        }, threadID, messageID);
+    } catch (err) {
+        console.error("Failed to send reaction reply:", err);
+    }
   }
 };
