@@ -1,22 +1,23 @@
 module.exports = {
   config: {
     name: "emojiReply",
-    version: "1.0.2",
-    author: "Villain Biplob",
+    version: "1.0.3",
+    author: "Villain Biplob (Fixed)",
     countDown: 5,
     role: 0,
     description: "Replies with matched text depending on the emoji sent by user",
     category: "events",
-    eventType: ["message"]
+    eventType: ["message", "message_reply"]
   },
 
-  handleEvent: async function({ api, event }) {
+  onStart: async function({ api, event }) {
     try {
       const { threadID, messageID, body, senderID } = event;
 
+      // বডি না থাকলে কিংবা মেসেজ না পাঠালে রিটার্ন করবে
       if (!body) return;
       
-      // বটের নিজের আইডি চেক করা
+      // বটের নিজের মেসেজ ইগনোর করা
       const botID = api.getCurrentUserID();
       if (senderID === botID) return;
 
@@ -86,9 +87,5 @@ module.exports = {
     } catch (error) {
       console.error("Error in emojiReply event:", error);
     }
-  },
-
-  onEvent: async function({ api, event }) {
-    return this.handleEvent({ api, event });
   }
 };
