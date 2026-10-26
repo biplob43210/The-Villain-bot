@@ -1,14 +1,18 @@
-Const axios = require("axios");
+const axios = require("axios");
+const fs = "fs"; // অথবা require("fs")
+const fsModule = require("fs");
+const path = require("path");
 
 module.exports = {
   config: {
     name: "marriage",
     aliases: ["biye", "marry"],
-    version: "1.0.0",
+    version: "1.0.3",
     credits: "Villain Biplob",
     description: "Fun marriage script with video attached",
     usages: "marriage @mention",
-    cooldown: 5
+    cooldown: 5,
+    category: "fun"
   },
 
   onStart: async function({ api, event, args }) {
@@ -21,20 +25,20 @@ module.exports = {
     }
 
     const partnerID = mentionedIDs[0];
-    const partnerName = mentions[partnerID].replace("@", "");
+    const partnerName = mentions[partnerID].replace("@", "",);
     const botID = api.getCurrentUserID();
 
     if (partnerID === botID) {
-      return api.sendMessage("😳 আরে পাগল! বটকে কেউ বিয়ে করে নাকি? অন্য কাউকে ট্রای করো! 😂", threadID, messageID);
+      return api.sendMessage("😳 আরে পাগল! বটকে কেউ বিয়ে করে নাকি? অন্য কাউকে ট্রাই করো! 😂", threadID, messageID);
     }
 
     // ২. সুন্দর শুভ বিবাহ টেক্সট
     const marriageText = 
       `📜 ─── [ শুভ নিকাহনামা ] ─── 💍\n\n` +
-      `🎉 অভিনন্দন! @${partnerName} এর সাথে আপনার ঘটা করে শুভ বিবাহ সম্পন্ন হলো!\n\n` +
-      `🤵‍♂️ ঘটক : 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯\n` +
-      `🤝 সাক্ষী : 𝗬𝘂𝘁𝗮\n` +
-      `💰 দেনমোহর : ৫ লক্ষ টাকা ধার্য করা হলো!\n\n` +
+      `🎉 𝗖𝗼𝗻𝗴𝗿𝗮𝘁𝘀 ! @${partnerName} এর সাথে আপনার ঘটা করে শুভ বিবাহ সম্পন্ন হলো!\n\n` +
+      `🤵‍♂️ ঘটক : 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯💋💥\n` +
+      `🤝 সাক্ষী : 𝗬𝘂𝘁𝗮🤖\n` +
+      `💰 দেনমোহর : মেয়ের সকল সম্পতি ছেলের নামে ধার্য করা হলো!\n\n` +
       `আপনাদের নতুন সংসারের জন্য শুভকামনা! 🍬✨`;
 
     const mentionData = [{
@@ -42,20 +46,46 @@ module.exports = {
       id: partnerID
     }];
 
+    const cacheDir = path.join(__dirname, "cache");
+    if (!fsModule.existsSync(cacheDir)) {
+      fsModule.mkdirSync(cacheDir, { recursive: true });
+    }
+
+    const videoPath = path.join(cacheDir, `marriage_${Date.now()}.mp4`);
+
     try {
-      // ৩. বিয়ের ভিডিওর ডিরেক্ট লিংক (এখানে আপনার পছন্দের বিয়ের শর্ট ভিডিও লিংক বসাতে পারেন)
-      const videoUrl = "https://i.imgur.com/3Z3Q83a.mp4"; // স্যাম্পল ভিডিও লিংক
-      const videoStream = (await axios.get(videoUrl, { responseType: "stream" })).data;
+      // ৩. ১০০% ওয়ার্কিং ডিরেক্ট ভিডিও লিংক
+      const videoUrl = "https://media.geeksforgeeks.org/wp-content/uploads/20210318193532/animation_500-4.mp4"; 
+      
+      const response = await axios({
+        method: 'GET',
+        url: videoUrl,
+        responseType: 'stream'
+      });
+
+      const writer = fsModule.createWriteStream(videoPath);
+      response.data.pipe(writer);
+
+      await new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
 
       return api.sendMessage({
         body: marriageText,
         mentions: mentionData,
-        attachment: videoStream
-      }, threadID, messageID);
+        attachment: fsModule.createReadStream(videoPath)
+      }, threadID, () => {
+        // পাঠানোর পর ক্যাশ থেকে ভিডিও ফাইল ডিলিট করা
+        if (fsModule.existsSync(videoPath)) fsModule.unlinkSync(videoPath);
+      }, messageID);
 
     } catch (error) {
       console.error("Marriage Video Error:", error);
-      // ভিডিও লোড না হলে শুধু টেক্সট পাঠাবে
+      
+      if (fsModule.existsSync(videoPath)) fsModule.unlinkSync(videoPath);
+
+      // কোনো কারণে ভিডিও ডাউনলোড ফেইল করলে শুধু টেক্সট পাঠাবে
       return api.sendMessage({
         body: marriageText,
         mentions: mentionData
