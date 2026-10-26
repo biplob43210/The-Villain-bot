@@ -1,7 +1,7 @@
 module.exports = {
   config: {
     name: "emojiReply",
-    version: "1.0.0",
+    version: "1.0.1",
     author: "Villain Biplob",
     countDown: 5,
     role: 0,
@@ -10,30 +10,34 @@ module.exports = {
     eventType: ["message"]
   },
 
-  onStart: async function({ api, event }) {
-    const { threadID, messageID, body } = event;
+  handleEvent: async function({ api, event }) {
+    const { threadID, messageID, body, senderID } = event;
 
     if (!body) return;
+    
+    // বটের নিজের আইডি চেক করা, যাতে বট নিজের মেসেজে নিজেই রিপ্লাই না দেয়
+    const botID = api.getCurrentUserID();
+    if (senderID === botID) return;
+
     const text = body.trim();
 
-    // ১. লাভ ও রোমান্টিক ইমোজি (❤️, 💖, 🌹, 💌 ইত্যাদি)
+    // ১. লাভ ও রোমান্টিক ইমোজি
     const loveEmojis = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💖", "💗", "💓", "💞", "💕", "💘", "💌", "💋", "🌹", "🌷", "🌸", "🥰", "😍", "😘"];
     
-    // ২. স্যাড ও ইমোশনাল ইমোজি (🥺, 😢, 😭, 💔, 🥀 ইত্যাদি)
+    // ২. স্যাড ও ইমোশনাল ইমোজি
     const sadEmojis = ["🥺", "😢", "😭", "💔", "🥀", "🌧️", "💧", "😔", "😞", "😩", "😫"];
     
-    // ৩. ফানি ও হাসির ইমোজি (😂, 🤣, 😜, 🤪, 🐒 ইত্যাদি)
+    // ৩. ফানি ও হাসির ইমোজি
     const funEmojis = ["😂", "🤣", "😆", "😜", "🤪", "😝", "😋", "😎", "🤩", "🥳", "🐒", "🍟", "🍕", "🍔"];
     
-    // ৪. ফ্যান্টাসি ও জাদুকরী ইমোজি (✨, 🪄, 🔮, 🌌 ইত্যাদি)
+    // ৪. ফ্যান্টাসি ও জাদুকরী ইমোজি
     const fantasyEmojis = ["✨", "🌟", "⭐", "💫", "🪄", "🔮", "🌌", "🧚‍♂️", "🦄", "🦋"];
     
-    // ৫. ফায়ার ও অ্যাটিটিউড ইমোজি (🔥, ⚡, 👑, 💯 ইত্যাদি)
+    // ৫. ফায়ার ও অ্যাটিটিউড ইমোজি
     const fireEmojis = ["🔥", "⚡", "💥", "💯", "👑", "🚀", "💪", "😈", "💀"];
 
     let replyMessage = "";
 
-    // চেক করা ইউজার কোন ক্যাটাগরির ইমোজি দিয়েছে
     if (loveEmojis.some(e => text.includes(e))) {
       const loveReplies = [
         `আহা! মনে হচ্ছে কেউ দারুণ রোমান্টিক মুডে আছে! সারাদিন শুধু ভালোবাসার জোয়ার বইছে দেখছি! ❤️✨`,
@@ -75,9 +79,13 @@ module.exports = {
       replyMessage = fireReplies[Math.floor(Math.random() * fireReplies.length)];
     }
 
-    // যদি মিলে যায়, তবে বট সুন্দর করে রিপ্লাই দিয়ে দেবে
     if (replyMessage) {
       return api.sendMessage(replyMessage, threadID, messageID);
     }
+  },
+
+  // কোনো কোনো বটে onEvent ফাংশনও সাপোর্ট করতে হয়, তাই এটিও রাখা হলো
+  onEvent: async function({ api, event }) {
+    return this.handleEvent({ api, event });
   }
 };
