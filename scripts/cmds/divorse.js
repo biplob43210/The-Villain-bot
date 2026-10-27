@@ -1,31 +1,33 @@
+const axios = require("axios");
+const fsModule = require("fs");
+const path = require("path");
+
 module.exports = {
   config: {
     name: "divorce",
     aliases: ["talak", "breakup"],
-    version: "1.2.0",
-    author: "Villain Biplob",
-    countDown: 5,
-    role: 0,
-    description: "Fun sad divorce script with double victim mention and boss custom message",
-    category: "fun",
+    version: "1.3.0",
+    credits: "Villain Biplob",
+    description: "Fun sad divorce script with video, double victim mention and boss custom message",
     usages: "divorce @mention1 @mention2",
-    cooldown: 5
+    cooldown: 5,
+    category: "fun",
+    role: 0
   },
 
   onStart: async function({ api, event, args }) {
     const { threadID, messageID, mentions } = event;
     const mentionedIDs = Object.keys(mentions);
 
-    // ১. কমপক্ষে দুজন বা একজনের মেনশন চেক করা (এখানে দুজন ভিকটিমের জন্য অন্তত ২ জন লাগবে)
+    // ১. কমপক্ষে দুজন মেনশন চেক করা
     if (mentionedIDs.length < 2) {
-      return api.sendMessage("⚠️ দয়া করে অন্তত **দুজনকেই** মেনশন করুন! যেমন: divorce @User1 @User2", threadID, messageID);
+      return api.sendMessage("⚠️ দয়া করে অন্তত দুজনকেই মেনশন করুন! যেমন: divorce @User1 @User2", threadID, messageID);
     }
 
-    // প্রথম ভিকটিম
+    // প্রথম এবং দ্বিতীয় ভিকটিমের তথ্য সংগ্রহ
     const victim1ID = mentionedIDs[0];
     const victim1Name = mentions[victim1ID].replace("@", "");
 
-    // দ্বিতীয় ভিকটিম
     const victim2ID = mentionedIDs[1];
     const victim2Name = mentions[victim2ID].replace("@", "");
 
@@ -51,15 +53,20 @@ module.exports = {
     ];
 
     try {
-      // ৩. টেক্সট এবং দুজন ভিকটিমের মেনশন পাঠানো
-      return api.sendMessage({
+      // ৩. ভিডিও স্ট্রিম ডাউনলোড করে টেক্সটের সাথে পাঠানো
+      const videoStream = (await axios.get("https://files.catbox.moe/04ssmo.mp4", {
+        responseType: "stream"
+      })).data;
+
+      return await api.sendMessage({
         body: divorceText,
+        attachment: videoStream,
         mentions: mentionData
       }, threadID, messageID);
 
     } catch (error) {
       console.error("Divorce Script Error:", error);
-      return api.sendMessage("❌ কমান্ডটি কার্যকর করতে সমস্যা হচ্ছে!", threadID, messageID);
+      return api.sendMessage("❌ কমান্ডটি কার্যকর করতে বা ভিডিও পাঠাতে সমস্যা হচ্ছে!", threadID, messageID);
     }
   }
 };
