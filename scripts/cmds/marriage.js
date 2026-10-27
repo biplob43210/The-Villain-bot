@@ -6,44 +6,91 @@ module.exports = {
   config: {
     name: "marriage",
     aliases: ["biye", "marry"],
-    version: "1.0.3",
+    version: "1.0.5",
     credits: "Villain Biplob",
-    description: "Fun marriage script with video attached",
-    usages: "marriage @mention",
+    description: "Fun marriage script with video attached and auto/manual mention support",
+    usages: "marriage [@mention @mention]",
     cooldown: 5,
     category: "fun"
   },
 
   onStart: async function({ api, event, args }) {
-    const { threadID, messageID, mentions } = event;
+    const { threadID, messageID, mentions, senderID } = event;
     const mentionedIDs = Object.keys(mentions);
     
-    // ১. মেনশন চেক করা
-    if (mentionedIDs.length === 0) {
-      return api.sendMessage("⚠️ কাউকেও তো বিয়ে করতে হবে! দয়া করে কাউকে মেনশন দিন। যেমন: marriage @Friend", threadID, messageID);
+    let partner1ID, partner1Name, partner2ID, partner2Name;
+    let mentionData = [];
+
+    // ১. যদি ২ জন বা তার বেশি মেনশন করা হয়
+    if (mentionedIDs.length >= 2) {
+      partner1ID = mentionedIDs[0];
+      partner1Name = mentions[partner1ID].replace("@", "");
+      
+      partner2ID = mentionedIDs[1];
+      partner2Name = mentions[partner2ID].replace("@", "");
+
+      mentionData = [
+        { tag: `@${partner1Name}`, id: partner1ID },
+        { tag: `@${partner2Name}`, id: partner2ID }
+      ];
+    } 
+    // ২. যদি ১ জন মেনশন করা হয় (তাকে এবং কমান্ডদাতাকে নিয়ে)
+    else if (mentionedIDs.length === 1) {
+      partner1ID = senderID;
+      try {
+        const senderInfo = await api.getUserInfo(senderID);
+        partner1Name = senderInfo[senderID] ? senderInfo[senderID].name : "User";
+      } catch (e) {
+        partner1Name = "User";
+      }
+
+      partner2ID = mentionedIDs[0];
+      partner2Name = mentions[partner2ID].replace("@", "");
+
+      mentionData = [
+        { tag: `@${partner1Name}`, id: partner1ID },
+        { tag: `@${partner2Name}`, id: partner2ID }
+      ];
+    } 
+    // ৩. কাউকেও মেনশন না করলে গ্রুপ থেকে রেন্ডম ২ জন সিলেক্ট করা
+    else {
+      try {
+        const threadInfo = await api.getThreadInfo(threadID);
+        const participantIDs = threadInfo.participantIDs.filter(id => id !== api.getCurrentUserID());
+
+        if (participantIDs.length < 2) {
+          return api.sendMessage("⚠️ গ্রুপে পর্যাপ্ত সদস্য নেই রেন্ডম বিয়ে দেওয়ার জন্য!", threadID, messageID);
+        }
+
+        // র‍্যান্ডমলি দুইজন মেম্বার বাছাই করা
+        const shuffled = participantIDs.sort(() => 0.5 - Math.random());
+        partner1ID = shuffled[0];
+        partner2ID = shuffled[1];
+
+        const usersInfo = await api.getUserInfo([partner1ID, partner2ID]);
+        partner1Name = usersInfo[partner1ID] ? usersInfo[partner1ID].name : "Hubby";
+        partner2Name = usersInfo[partner2ID] ? usersInfo[partner2ID].name : "Wifey";
+
+        mentionData = [
+          { tag: `@${partner1Name}`, id: partner1ID },
+          { tag: `@${partner2Name}`, id: partner2ID }
+        ];
+      } catch (err) {
+        console.error("Random Marriage Error:", err);
+        return api.sendMessage("⚠️ রেন্ডমলি কাউকে সিলেক্ট করতে সমস্যা হয়েছে। দয়া করে মেনশন করে দিন!", threadID, messageID);
+      }
     }
 
-    const partnerID = mentionedIDs[0];
-    const partnerName = mentions[partnerID].replace("@", "",);
-    const botID = api.getCurrentUserID();
-
-    if (partnerID === botID) {
-      return api.sendMessage("😳 আরে পাগল! বটকে কেউ বিয়ে করে নাকি? অন্য কাউকে ট্রাই করো! 😂", threadID, messageID);
-    }
-
-    // ২. সুন্দর শুভ বিবাহ টেক্সট
+    // নতুন ফরম্যাট অনুযায়ী শুভ বিবাহ টেক্সট
     const marriageText = 
       `📜 ─── [ শুভ নিকাহনামা ] ─── 💍\n\n` +
-      `🎉 𝗖𝗼𝗻𝗴𝗿𝗮𝘁𝘀 ! @${partnerName} এর সাথে আপনার ঘটা করে শুভ বিবাহ সম্পন্ন হলো!\n\n` +
+      `🎉 𝗖𝗼𝗻𝗴𝗿𝗮𝘁𝘀 ! দুই জনের ঘটা করে শুভ বিবাহ সম্পন্ন হলো!\n\n` +
+      `𝗛𝘂𝗯𝗯𝘆 : @${partner1Name}\n` +
+      `𝗪𝗶𝗳𝗲𝘆 : @${partner2Name}\n\n` +
       `🤵‍♂️ ঘটক : 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯💋💥\n` +
       `🤝 সাক্ষী : 𝗬𝘂𝘁𝗮🤖\n` +
       `💰 দেনমোহর : মেয়ের সকল সম্পতি ছেলের নামে ধার্য করা হলো!\n\n` +
       `আপনাদের নতুন সংসারের জন্য শুভকামনা! 🍬✨`;
-
-    const mentionData = [{
-      tag: `@${partnerName}`,
-      id: partnerID
-    }];
 
     const cacheDir = path.join(__dirname, "cache");
     if (!fsModule.existsSync(cacheDir)) {
@@ -53,7 +100,7 @@ module.exports = {
     const videoPath = path.join(cacheDir, `marriage_${Date.now()}.mp4`);
 
     try {
-      // ৩. আপনার দেওয়া Catbox ভিডিওর ডিরেক্ট লিংক
+      // আপনার দেওয়া Catbox ভিডিওর ডিরেক্ট লিংক
       const videoUrl = "https://files.catbox.moe/1671jv.mp4"; 
       
       const response = await axios({
