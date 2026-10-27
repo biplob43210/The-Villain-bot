@@ -2,15 +2,16 @@ module.exports = {
   config: {
     name: "reactionReply",
     version: "1.1.4",
-    author: "Yuta biplob",
-    countDown: 5,
-    role: 0,
+    credits: "Yuta biplob", // author কেটে credits করা হয়েছে
     description: "Reacts and replies based on the user's reaction to bot's message",
     category: "events",
-    eventType: ["message_reaction"]
+    usages: "React to bot's messages",
+    cooldown: 5,
+    role: 0
   },
 
-  onStart: async function({ api, event }) {
+  // ইভেন্ট বা রিঅ্যাকশন ট্র্যাক করার জন্য onEvent ব্যবহার করা হয়েছে
+  onEvent: async function({ api, event }) {
     const { threadID, userID, reaction, messageID } = event;
     const botID = api.getCurrentUserID();
 
@@ -56,7 +57,7 @@ module.exports = {
       case "😡":
       case "😠":
       case "ANGRY":
-        replyMessage = `উফ! এত রেগে যাচ্ছেন কেন @${name}? কুল ডাউন! 🧊\nআমার বস 🦋⃟✮⃝𝐕𝐢𝗹𝗹𝐚𝐢𝗻 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝ এর রাজ্যে রাগারাগি একদম নিষিদ্ধ! 😼`;
+        replyMessage = `উফ! এত রেগে যাচ্ছেন কেন @${name}? কুল ডাউন! 🧊\nআমার বস 🦋⃟✮⃝𝐕𝐢𝗹𝗹𝗮𝗶𝗻 𝐁𝐈𝐏𝐋𝐎𝐁🩵⃟✮⃝ এর রাজ্যে রাগারাগি একদম নিষিদ্ধ! 😼`;
         break;
       case "😮":
       case "😲":
