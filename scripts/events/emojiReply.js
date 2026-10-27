@@ -2,15 +2,15 @@ module.exports = {
   config: {
     name: "emojiReply",
     version: "1.0.3",
-    author: "Villain Biplob (Fixed)",
-    countDown: 5,
-    role: 0,
+    credits: "Villain Biplob (Fixed)",
     description: "Replies with matched text depending on the emoji sent by user",
     category: "events",
-    eventType: ["message", "message_reply"]
+    usages: "Send emojis to get automatic reply",
+    cooldown: 5,
+    role: 0
   },
 
-  onStart: async function({ api, event }) {
+  onChat: async function({ api, event }) {
     try {
       const { threadID, messageID, body, senderID } = event;
 
