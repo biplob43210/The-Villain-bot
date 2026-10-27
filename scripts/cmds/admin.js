@@ -24,7 +24,7 @@ module.exports = {
       `👑 𝗢𝘄𝗻𝗲𝗿 : 𝗩𝗶𝗹𝗹𝗮𝗶𝗻 𝗕𝗶𝗽𝗹𝗼𝗯\n` +
       `🏡 𝗗𝗶𝘀𝘁𝗿𝗶𝗰𝘁 : 𝗦𝗶𝗿𝗮ජ𝗴𝗮𝗻𝗷\n` +
       `🆔 𝗔𝗱𝗺𝗶𝗻 𝘂𝗶𝗱 : 𝗩𝗶𝗹𝗲𝗻𝗯𝗶𝗽𝗹𝗼𝗯007\n` +
-      `🌐 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 : https://facebook.com/𝗩𝗶𝗹𝗲𝗻𝗯𝗶𝗽𝗹𝗼𝗯007\n\n` +
+      `🌐 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 : https://facebook.com/Vilenbiplob007\n\n` +
       `📝 𝗕𝗶𝗼 : "Love is Name Sex Is game!💋💥"\n\n` +
       `✨ Contact the owner for any bot-related issues or inquiries!`;
 
