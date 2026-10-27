@@ -2,16 +2,16 @@ module.exports = {
   config: {
     name: "hello",
     version: "1.0.0",
-    author: "Villain Biplob",
-    countDown: 5,
-    role: 0,
+    credits: "Villain Biplob", // author কেটে credits করা হয়েছে
     description: "Automatic sweet reply for salam and hi/hello without prefix",
     category: "noprefix",
     usages: "Say hi, hello or assalamu alaikum",
-    cooldown: 3
+    cooldown: 3,
+    role: 0
   },
 
-  onStart: async function({ api, event }) {
+  // প্রিফিক্স ছাড়া মেসেজ ডিটেক্ট করার জন্য onChat ব্যবহার করতে হয়
+  onChat: async function({ api, event }) {
     const { threadID, messageID, body } = event;
     if (!body) return;
 
@@ -27,7 +27,7 @@ module.exports = {
       return api.sendMessage(salamReplies[Math.floor(Math.random() * salamReplies.length)], threadID, messageID);
     }
 
-    // ২. হাই / হ্যালো বা কে কেমন আছো এর উত্তর
+    // ২. হাই / হ্যালো এর উত্তর
     if (text === "hi" || text === "hello" || text === "হাই" || text === "হ্যালো") {
       const helloReplies = [
         `হ্যালো! 👋 কেমন আছেন সবাই? আজ আড্ডার পরিবেশ কেমন? 🌸`,
